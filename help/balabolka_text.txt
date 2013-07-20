@@ -1,0 +1,170 @@
+Balabolka (utilitaire d'extraction de texte du fichier), version 1.04
+Copyright (c) 2013 Ilya Morozov
+All Rights Reserved
+
+WWW: http://www.cross-plus-a.com/fr/btext.htm
+E-mail: crossa@hotbox.ru
+
+Licence : Freeware
+Système d'exploitation : Microsoft Windows XP/Vista/7/8 
+
+
+Le programme permet d'extraire le texte de différents types de fichiers.
+L’extrait du texte peut être combiné en un seul fichier et/ou fractionné en plusieurs fichiers.
+Les règles de correction de la prononciation de Balabolka peuvent être appliquées au texte.
+Les formats suivants sont soutenus : AZW, AZW3, CHM, DOC, DOCX, EPUB, FB2, HTML, MHT, MOBI, ODT, PDF, PRC, RTF, TXT.
+
+
+*** Ligne de commande ***
+
+balabolka_text.exe [options ...]
+
+
+*** Paramètres de ligne de commande ***
+
+-f <nom_de_fichier>
+   Le nom du fichier d'entrée ou le masque pour un groupe de fichiers d'entrée. La ligne de commande peut contenir quelques options [-f].
+
+-v <nom_de_dossier>
+   Le nom du dossier de sortie pour un fichier texte enregistré.
+
+-p <nom_de_fichier>
+   Spécifie le modèle pour le nom de fichier de sortie (par exemple, « Document texte »). En cas d'absence, le nom du fichier d'entrée est utilisé.
+
+-i
+   Lit le texte de flux d'entrée standard (STDIN). Si l'option est spécifiée, l'option [-f] est ignorée.
+
+-o
+   Enregistre le texte dans le flux de sortie standard (STDOUT). Si l'option est spécifiée, les options [-v] et [-p] sont ignorées.
+
+-u
+   Combine les fichiers texte en un seul fichier de sortie.
+
+-b
+   Ajoute le numéro de séquence devant le nom de fichier de sortie.
+
+-a
+   Ajoute le numéro de séquence après le nom de fichier de sortie.
+
+-n <nombre_intégral>
+   Spécifie le numéro de séquence de départ pour les fichiers de sortie. La valeur par défaut est 1.
+
+-e <encodage>
+   Spécifie l'encodage pour les fichiers de sortie (« ansi », « utf8 » ou « unicode »). La valeur par défaut est « ansi ».
+
+-t <nombre_intégral>
+   Spécifie le mode de fractionnement du texte : fichier d’une taille spécifiée. Le nombre désigne la taille en kilobytes.
+
+-k <mot-clé>
+   Fractionne le texte sur le mot-clé spécial dans le fichier d'entrée. L'option est sensible à la casse. La ligne de commande peut contenir plusieurs options [-k].
+
+-r <mot-clé>
+   Fractionne le texte sur le mot-clé et le supprime des fichiers de sortie. L'option est sensible à la casse. La ligne de commande peut contenir plusieurs options [-r].
+
+-w
+   Fractionne le texte sur deux lignes vides consécutives.
+
+-l
+   Fractionne le texte sur les lignes où toutes les lettres sont majuscules.
+
+-d <nom_de_fichier>
+   Utilise un dictionnaire pour la correction de la prononciation (fichiers *.REX ou *.DIC). La ligne de commande peut contenir plusieurs options [-d].
+
+-pwd <texte>
+   Spécifie le mot de passe pour extraire le texte des fichiers PDF cryptés.
+
+-? ou -h
+   Affiche la liste des options de ligne de commande disponibles.
+
+--remove-spaces
+   Supprime les espaces superflues (deux ou plusieurs espaces de suite, espaces insécables).
+
+--remove-hyphens
+   Supprime tous les traits d'union à la fin des lignes.
+
+--remove-linebreaks
+   Supprime les sauts de ligne à l'intérieur des paragraphes.
+
+--remove-empty-lines
+   Supprime les lignes vides.
+
+--replace-empty-lines
+   Remplace plusieurs lignes vides d’une seule ligne vide.
+
+--remove-square-brackets
+   Supprime le texte entre [crochets].
+
+--remove-curly-brackets
+   Supprime le texte entre {accolades}.
+
+--remove-angle-brackets
+   Supprime le texte entre <chevrons>.
+
+--fix-ocr-errors
+   Corrige les erreurs d'OCR (reconnaissance optique de caractères) (pour les langues avec les alphabets cyrilliques uniquement).
+
+
+*** Exemples ***
+
+balabolka_text.exe -f "d:\Docs\book.doc" -v "d:\Text\" -p "Nouveau livre"
+
+balabolka_text.exe -f "d:\Docs\*.doc" -f "d:\Docs\*.rtf" -v "d:\Text\" -e "utf8" --replace-empty-lines
+
+balabolka_text.exe -f "d:\Docs\*.*" -v "d:\Text\" -p "Document" -u
+
+balabolka_text.exe -f "d:\Docs\1.doc" -v "d:\Text\" -p "Document" -a -n 20 -t 100
+
+balabolka_text.exe -f "d:\Book\book.fb2" -v "d:\Text\" -p "Livre" -k "CHAPITRE" -k "TABLE DES MATIÈRES"
+
+balabolka_text.exe -f "d:\Book\book.epub" -v "d:\Text\" -p "Livre" -r "###"
+
+balabolka_text.exe -f "d:\Docs\book.doc" -v "d:\Text\" -d "d:\rex\rules.rex" -d "d:\dic\rules.dic" --remove-spaces --remove-linebreaks
+
+balabolka_text.exe -i -o --remove-spaces --remove-linebreaks --replace-empty-lines
+
+
+*** Fichier de configuration ***
+
+Les options de ligne de commande peuvent être enregistrées en tant que fichier de configuration « balabolka_text.cfg » dans le même dossier que l'application console.
+
+Exemple de fichier de configuration :
+===============
+-f d:\Docs\*.rtf
+-f d:\Books\*.epub
+-f d:\Books\*.fb2
+-v d:\Text
+-b
+-n 1
+-t 25
+-e utf8
+-d d:\rex\rules.rex
+-d d:\dic\rules.dic
+--remove-spaces
+--remove-linebreaks
+--replace-empty-lines
+===============
+
+Le programme peut combiner les options du fichier de configuration et celles de la ligne de commande.
+
+
+*** Opérations ***
+
+L’ordre d'exécution des opérations :
+
+1.  Extraire le texte de fichier(s).
+2.  Formater le texte : supprimer les espaces superflues, sauts de ligne, etc. (si l'option est spécifiée).
+3.  Combiner le texte en un seul fichier (si l'option est spécifiée).
+4.  Fractionner le texte (si l'option est spécifiée).
+5.  Appliquer les règles de correction de la prononciation (si l'option est spécifiée).
+6.  Enregistrer le(s) fichier(s) de sortie sur disque.
+
+
+*** Licence ***
+
+Droits d'utilisation non commerciale de l’application :
+- personnes physiques – sans restriction,
+- personnes morales – avec les restrictions stipulées dans l'Accord de Licence du logiciel Balabolka.
+
+L’utilisation commerciale du logiciel demande l'autorisation du détenteur du copyright.
+
+###

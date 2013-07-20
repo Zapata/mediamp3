@@ -1,0 +1,7 @@
+- Download / Install lame
+- Write code to download articles from l'equipe.
+- Send email
+- Fine tune voice configuration + text cleaning
+
+- Write a download / install script (to don't save everything on git)
+
