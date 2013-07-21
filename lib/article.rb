@@ -20,7 +20,7 @@ class Article
   def self.json_create(json)
     a = new(json['id'], json['source'])
     json.each do |var, value|
-      self.instance_variable_set var, value unless ['id', 'source', 'json_class'].include?(var)
+      a.instance_variable_set "@#{var}", value unless ['id', 'source', 'json_class'].include?(var)
     end
     return a
   end

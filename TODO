@@ -1,9 +1,9 @@
-- Convert text to wav (balabolka)
-- Convert wav to mp3 (lame)
 - Save mp3 online (fileshare / nosql db?)
 - Send simple email
 - Write a download / install script (to don't save everything on git)
 - Daily batch job (EC2 Windows?)
+
+- Better monitor (add stats in encoder: article size, mp3 size, average time/size per word ...)
 
 - Generify crawler
 - Crawl 20 minutes
