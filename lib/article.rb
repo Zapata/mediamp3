@@ -1,26 +1,30 @@
 require 'json'
 
 class Article
-  attr_reader :id, :source
-  attr_accessor :title, :content, :html
+  attr_reader :url, :source
+  attr_accessor :id, :title, :content, :html
   
-  def initialize(id, source)
-      @id = id
+  def initialize(url, source)
+      @url = url
       @source = source
   end
   
   def save(path)
-    filename = "#{path}/#{id}.json"
+    filename = full_path(path)
     puts "Saving '#{title}' in #{filename} ..."
     File.open(filename, 'w') do |f|
        f.write JSON.pretty_generate(self)
     end
   end  
   
+  def full_path(path)
+    return "#{path}/#{id}.json"
+  end
+  
   def self.json_create(json)
-    a = new(json['id'], json['source'])
+    a = new(json['url'], json['source'])
     json.each do |var, value|
-      a.instance_variable_set "@#{var}", value unless ['id', 'source', 'json_class'].include?(var)
+      a.instance_variable_set "@#{var}", value unless ['url', 'source', 'json_class'].include?(var)
     end
     return a
   end
@@ -36,5 +40,13 @@ class Article
   
   def to_json(*a)
     as_json.to_json(*a)
+  end
+  
+  def to_s
+    "#{id} - #{title} (#{url})."
+  end
+  
+  def eql?(other)
+    title.eql?(other.title)
   end
 end

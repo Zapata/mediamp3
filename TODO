@@ -1,11 +1,16 @@
-- Save mp3 online (fileshare / nosql db?)
+- Improve command line (easely run only one step).
+- Save mp3 online (Amazon S3)
 - Send simple email
+- Provide a configuration file.
+- See podcast diffusion
 - Write a download / install script (to don't save everything on git)
 - Daily batch job (EC2 Windows?)
+- Add rights to download: AWS - Identity Access Management
+- See bittorrent diffusion
 
 - Better monitor (add stats in encoder: article size, mp3 size, average time/size per word ...)
 
-- Generify crawler
-- Crawl 20 minutes
+- 20 minutes: 
+   - gather more metadata.
 
 - Fine tune voice configuration
