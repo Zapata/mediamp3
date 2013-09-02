@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'bundler/setup'
-require "thor"
+require 'thor'
+require 'aws-sdk'
 
 $LOAD_PATH.unshift File.dirname(__FILE__) + '/lib'
 require 'article'
@@ -48,15 +49,31 @@ class MediaMp3 < Thor
     Dir["#{path}/*.json"].each do |f|
       article = JSON.load(File.new(f))
       mp3_filename = article.full_path(path).sub('.json', '.mp3')
-      unless options[:force] && File.exists?(mp3_filename)
+      if options[:force] || ! File.exists?(mp3_filename)
         encoder.encode(article)
       end
     end  
   end
   
+  option :aws_login, :required => true
+  option :aws_password, :required => true
   desc "upload SOURCE", "Upload mp3 files to Amazon S3."
   def upload(source)
     path = calculate_path(options[:date], source)
+     
+    s3 = AWS::S3.new(
+      :access_key_id => options[:aws_login], 
+      :secret_access_key => options[:aws_password])
+    bucket = s3.buckets['mediamp3']
+     
+    Dir["#{path}/*.mp3"].each do |filename|
+      object = bucket.objects[filename]
+      unless object.exists?
+        puts "Uploading #{filename}..."
+        object.write(:file => filename)
+        object.acl = :public_read
+      end
+    end
     
   end
 

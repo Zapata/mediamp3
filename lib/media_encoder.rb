@@ -10,7 +10,9 @@ class MediaEncoder
 
     print "Encoding '#{article.title}' into #{audio_file} ... "
 
-    File.open(content_file, "w:Windows-1252") { |f| f.write(article.content.encode('Windows-1252')) }
+    File.open(content_file, "w:Windows-1252") do |f| 
+      f.write(article.content.encode('Windows-1252', :invalid => :replace, :undef => :replace, :replace => ''))
+    end
     
     balabolka_cmd = "bin\\balabolka_console.exe -o --raw -f #{content_file} "
     lame_cmd = "bin\\lame.exe -r --silent -s 16 -m m -h - #{audio_file}"
