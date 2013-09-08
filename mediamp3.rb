@@ -2,31 +2,34 @@ require 'rubygems'
 require 'bundler/setup'
 require 'thor'
 require 'aws-sdk'
+require 'configuration'
 
 $LOAD_PATH.unshift File.dirname(__FILE__) + '/lib'
 require 'article'
 require 'media_encoder'
 
- 
 class MediaMp3 < Thor
-  class_option :date, :default => Time.new.strftime('%Y%m%d')
-  class_option :force, :type => :boolean, :default => false
-
+  class_option :date, :default => Time.new.strftime('%Y%m%d'), :desc => 'Wich date to work on?'
+  class_option :force, :type => :boolean, :default => false, :desc => 'Force to redo the action.'
+    
   option :user
   option :password
   desc "crawl SOURCE", "Crawl HTML source website to get all article on txt format."
   def crawl(source)    
-    # TODO: Check for invalid source.
-    
+    check_sources(source)
+
     require "crawler/#{source}"
     crawler_klass = Kernel.const_get(camelize(source))      
     
     crawler = nil
-    if options[:user].nil?
+    source_config = @config.crawler.method(source).call     
+    user = source_config.user || options[:user]
+    password = source_config.password || options[:password]
+      
+    if user.nil?
       crawler = crawler_klass.new
     else
-      # TODO: Check both user and password have been provided
-      crawler = crawler_klass.new(options[:user], options[:password])
+      crawler = crawler_klass.new(user, password)
     end
     
     path = calculate_path(options[:date], source)
@@ -41,10 +44,11 @@ class MediaMp3 < Thor
   
   desc "encode SOURCE", "Convert all articles from a source to mp3."
   def encode(source)
+    check_sources(source)
     path = calculate_path(options[:date], source)
-      
+    
     # TODO: Check articles have been crawled previously.
-
+      
     encoder = MediaEncoder.new(path)
     Dir["#{path}/*.json"].each do |f|
       article = JSON.load(File.new(f))
@@ -59,12 +63,13 @@ class MediaMp3 < Thor
   option :aws_password, :required => true
   desc "upload SOURCE", "Upload mp3 files to Amazon S3."
   def upload(source)
+    check_sources(source)
     path = calculate_path(options[:date], source)
      
     s3 = AWS::S3.new(
-      :access_key_id => options[:aws_login], 
-      :secret_access_key => options[:aws_password])
-    bucket = s3.buckets['mediamp3']
+      :access_key_id => @config.aws.access_key_id || options[:aws_login], 
+      :secret_access_key => @config.aws.secret_access_key || options[:aws_password])
+    bucket = s3.buckets[@config.aws.bucket || 'mediamp3']
      
     Dir["#{path}/*.mp3"].each do |filename|
       object = bucket.objects[filename]
@@ -79,6 +84,7 @@ class MediaMp3 < Thor
 
   desc "email SOURCE", "Send email with links to mp3."
   def email(source)
+    check_sources(source)
     path = calculate_path(options[:date], source)
     
   end
@@ -91,8 +97,22 @@ class MediaMp3 < Thor
     def calculate_path(date, source)
       "#{date}/#{source}"
     end
+    
+    def check_sources(source)
+      source_extractor = /lib\/crawler\/(?<source>.*)\.rb/
+      available_sources = Dir.glob('lib/crawler/*.rb').collect { |s| source_extractor.match(s)[:source] }
+      available_sources.delete('crawler')
+      
+      unless available_sources.include?(source)
+        raise MalformattedArgumentError, "Expected 'source' to be one of #{available_sources.join(', ')}; got #{source}"
+      end
+    end
   end
-
+  
+  def initialize(*args)
+    super
+    @config = Configuration.load 'config'
+  end
 end
  
 MediaMp3.start(ARGV)

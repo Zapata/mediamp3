@@ -1,7 +1,4 @@
-- Improve command line (easely run only one step).
-- Save mp3 online (Amazon S3)
 - Send simple email
-- Provide a configuration file.
 - See podcast diffusion
 - Write a download / install script (to don't save everything on git)
 - Daily batch job (EC2 Windows?)
