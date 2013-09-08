@@ -4,7 +4,7 @@ require 'uri'
 require 'cgi'
 require 'set'
 require 'net/http'
-require 'crawler/crawler'
+require_relative 'crawler'
 
 
 class Lequipe < Crawler

@@ -6,7 +6,7 @@ require 'cgi'
 require 'net/http'
 require 'anemone'
 require 'nokogiri'
-require 'article'
+require_relative '../article'
 
 class Crawler
   public
@@ -22,7 +22,10 @@ class Crawler
       
       anemone.on_every_page do |page|
         article = extract_article(page, date)
-        unique_articles << article if valid(unique_articles, article)
+        if valid(unique_articles, article)
+          unique_articles << article 
+          yield article if block_given?
+        end
       end
     end
     

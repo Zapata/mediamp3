@@ -1,6 +1,6 @@
 # -*- encoding : utf-8 -*-
 
-require 'crawler/crawler'
+require_relative 'crawler'
 
 class VingtMinutes < Crawler
   public
@@ -20,6 +20,11 @@ class VingtMinutes < Crawler
   def extract_id(url, date) 
     m = url.path.match(/(\d+)-#{date}-/)
     m.nil? ? nil : m[1] 
+  end
+  
+  def clean_text(text)
+    text = super
+    text.gsub(/\.([^\.])/, '. \1')
   end
   
   def extract_article(page, date)

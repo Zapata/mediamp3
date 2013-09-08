@@ -4,28 +4,25 @@ require 'thor'
 require 'aws-sdk'
 require 'configuration'
 
-$LOAD_PATH.unshift File.dirname(__FILE__) + '/lib'
-require 'article'
-require 'media_encoder'
+require_relative 'lib/article'
+require_relative 'lib/media_encoder'
 
 class MediaMp3 < Thor
   class_option :date, :default => Time.new.strftime('%Y%m%d'), :desc => 'Wich date to work on?'
   class_option :force, :type => :boolean, :default => false, :desc => 'Force to redo the action.'
     
-  option :user
-  option :password
   desc "crawl SOURCE", "Crawl HTML source website to get all article on txt format."
   def crawl(source)    
     check_sources(source)
 
-    require "crawler/#{source}"
+    require_relative "lib/crawler/#{source}"
     crawler_klass = Kernel.const_get(camelize(source))      
     
-    crawler = nil
-    source_config = @config.crawler.method(source).call     
-    user = source_config.user || options[:user]
-    password = source_config.password || options[:password]
+    source_config = @config.crawler.method(source).call
+    user = source_config.respond_to?(:user) ? source_config.user : nil
+    password = source_config.respond_to?(:password) ? source_config.password  : nil
       
+    crawler = nil
     if user.nil?
       crawler = crawler_klass.new
     else
@@ -37,8 +34,7 @@ class MediaMp3 < Thor
     FileUtils.mkdir_p(path) unless File.exists?(path)
 
     puts "Crawling: #{crawler.source}"
-    articles = crawler.crawl(options[:date])
-    articles.each { |a| a.save(path) }
+    articles = crawler.crawl(options[:date]) { |a| a.save(path) }
   end
   
   
@@ -47,35 +43,31 @@ class MediaMp3 < Thor
     check_sources(source)
     path = calculate_path(options[:date], source)
     
-    # TODO: Check articles have been crawled previously.
-      
-    encoder = MediaEncoder.new(path)
-    Dir["#{path}/*.json"].each do |f|
-      article = JSON.load(File.new(f))
-      mp3_filename = article.full_path(path).sub('.json', '.mp3')
-      if options[:force] || ! File.exists?(mp3_filename)
-        encoder.encode(article)
+    encoder = MediaEncoder.new()
+    on_articles(path) do |article|
+      if options[:force] || ! File.exists?(article.path(path, 'mp3'))
+        encoder.encode(path, article)
       end
     end  
   end
   
-  option :aws_login, :required => true
-  option :aws_password, :required => true
   desc "upload SOURCE", "Upload mp3 files to Amazon S3."
   def upload(source)
     check_sources(source)
     path = calculate_path(options[:date], source)
      
     s3 = AWS::S3.new(
-      :access_key_id => @config.aws.access_key_id || options[:aws_login], 
-      :secret_access_key => @config.aws.secret_access_key || options[:aws_password])
-    bucket = s3.buckets[@config.aws.bucket || 'mediamp3']
-     
-    Dir["#{path}/*.mp3"].each do |filename|
+      :access_key_id => @config.aws.access_key_id, 
+      :secret_access_key => @config.aws.secret_access_key)
+    bucket = s3.buckets['mediamp3']
+    puts "Start upload to: #{bucket.url}"
+    
+    on_articles(path) do |article|
+      filename = article.path(path, 'mp3')
       object = bucket.objects[filename]
       unless object.exists?
         puts "Uploading #{filename}..."
-        object.write(:file => filename)
+        object.write(:file => filename, :content_type => 'audio/mpeg')
         object.acl = :public_read
       end
     end
@@ -105,6 +97,13 @@ class MediaMp3 < Thor
       
       unless available_sources.include?(source)
         raise MalformattedArgumentError, "Expected 'source' to be one of #{available_sources.join(', ')}; got #{source}"
+      end
+    end
+    
+    def on_articles(path)
+      Dir["#{path}/*.json"].each do |f|
+        article = JSON.load(File.new(f))
+        yield article
       end
     end
   end

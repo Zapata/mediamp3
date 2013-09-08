@@ -6,9 +6,10 @@
 - See bittorrent diffusion
 
 - Better monitor (add stats in encoder: article size, mp3 size, average time/size per word ...)
+- Rewrite using in asynchronous mode (reactor pattern).
+- Store everything in a database.
 
 - 20 minutes: 
-   - Mettre des espaces autour des points.
    - gather more metadata.
 
 - Fine tune voice configuration

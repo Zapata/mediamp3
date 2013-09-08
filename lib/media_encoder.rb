@@ -1,12 +1,8 @@
 class MediaEncoder
-  def initialize(path)
-     @path = path
-  end
-  
-  def encode(article)
+  def encode(path, article)
     beginning_time = Time.now
-    content_file = "#{@path}/#{article.id}.txt"
-    audio_file = "#{@path}/#{article.id}.mp3"
+    content_file = article.path(path, 'txt')
+    audio_file = article.path(path, 'mp3')
 
     print "Encoding '#{article.title}' into #{audio_file} ... "
 

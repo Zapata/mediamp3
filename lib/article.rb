@@ -10,17 +10,17 @@ class Article
   end
   
   def save(path)
-    filename = full_path(path)
+    filename = path(path, 'json')
     puts "Saving '#{title}' in #{filename} ..."
     File.open(filename, 'w') do |f|
        f.write JSON.pretty_generate(self)
     end
   end  
   
-  def full_path(path)
-    return "#{path}/#{id}.json"
+  def path(basepath, ext)
+    return "#{basepath}/#{id}.#{ext}"
   end
-  
+
   def self.json_create(json)
     a = new(json['url'], json['source'])
     json.each do |var, value|
