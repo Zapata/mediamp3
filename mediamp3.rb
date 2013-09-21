@@ -1,11 +1,14 @@
 require 'rubygems'
 require 'bundler/setup'
+
 require 'thor'
-require 'aws-sdk'
 require 'configuration'
 
 require_relative 'lib/article'
 require_relative 'lib/media_encoder'
+require_relative 'lib/storage'
+require_relative 'lib/mail_builder'
+require_relative 'lib/mailer'
 
 class MediaMp3 < Thor
   class_option :date, :default => Time.new.strftime('%Y%m%d'), :desc => 'Wich date to work on?'
@@ -15,38 +18,31 @@ class MediaMp3 < Thor
   def crawl(source)    
     check_sources(source)
 
+    # Fixme: move this in cralwer.rb
     require_relative "lib/crawler/#{source}"
     crawler_klass = Kernel.const_get(camelize(source))      
     
-    source_config = @config.crawler.method(source).call
-    user = source_config.respond_to?(:user) ? source_config.user : nil
-    password = source_config.respond_to?(:password) ? source_config.password  : nil
-      
-    crawler = nil
-    if user.nil?
-      crawler = crawler_klass.new
-    else
-      crawler = crawler_klass.new(user, password)
+    crawler = crawler_klass.new
+    if crawler.respond_to?(:login)
+      crawler.login(source_config(source).user, source_config(source).password) 
     end
     
     path = calculate_path(options[:date], source)
     FileUtils.remove_entry(path, true) if options[:force]
     FileUtils.mkdir_p(path) unless File.exists?(path)
 
-    puts "Crawling: #{crawler.source}"
-    articles = crawler.crawl(options[:date]) { |a| a.save(path) }
+    articles = crawler.crawl(options[:date]) { |a| a.save }
   end
   
   
   desc "encode SOURCE", "Convert all articles from a source to mp3."
   def encode(source)
     check_sources(source)
-    path = calculate_path(options[:date], source)
     
     encoder = MediaEncoder.new()
-    on_articles(path) do |article|
-      if options[:force] || ! File.exists?(article.path(path, 'mp3'))
-        encoder.encode(path, article)
+    on_articles(options[:date], source) do |article|
+      if options[:force] || ! File.exists?(article.path('mp3'))
+        encoder.encode(article)
       end
     end  
   end
@@ -54,32 +50,36 @@ class MediaMp3 < Thor
   desc "upload SOURCE", "Upload mp3 files to Amazon S3."
   def upload(source)
     check_sources(source)
-    path = calculate_path(options[:date], source)
-     
-    s3 = AWS::S3.new(
-      :access_key_id => @config.aws.access_key_id, 
-      :secret_access_key => @config.aws.secret_access_key)
-    bucket = s3.buckets['mediamp3']
-    puts "Start upload to: #{bucket.url}"
     
-    on_articles(path) do |article|
-      filename = article.path(path, 'mp3')
-      object = bucket.objects[filename]
-      unless object.exists?
-        puts "Uploading #{filename}..."
-        object.write(:file => filename, :content_type => 'audio/mpeg')
-        object.acl = :public_read
-      end
+    s = Storage.new(@config.storage)
+    on_articles(options[:date], source) do |article|
+      s.upload(article)
     end
-    
   end
 
-  desc "email SOURCE", "Send email with links to mp3."
-  def email(source)
+  desc "mail_generate SOURCE", "Send email with links to mp3."
+  def mail_generate(source)
     check_sources(source)
-    path = calculate_path(options[:date], source)
+
+    articles = []
+    on_articles(options[:date], source) { |a| articles << a }
     
+    m = MailBuilder.new(source_config(source).name, options[:date], @config.storage.base_url)
+    puts m.build(articles)
   end
+  
+  desc "mail_test SOURCE", "Manipulate MailJet API"
+  def mail_test(source)
+    check_sources(source)
+
+    articles = []
+    on_articles(options[:date], source) { |a| articles << a }
+
+    m = Mailer.new(@config.email)
+    m.test(source_config(source).name, options[:date], @config.storage.base_url, articles)
+  end
+  
+  
   
   no_commands do
     def camelize(str)
@@ -100,11 +100,15 @@ class MediaMp3 < Thor
       end
     end
     
-    def on_articles(path)
-      Dir["#{path}/*.json"].each do |f|
+    def on_articles(date, source)
+      Dir["#{calculate_path(date, source)}/*.json"].each do |f|
         article = JSON.load(File.new(f))
         yield article
       end
+    end
+    
+    def source_config(source)
+      @config.crawler.method(source).call
     end
   end
   

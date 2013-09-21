@@ -14,6 +14,10 @@ class Lequipe < Crawler
   def source
      return :lequipe
   end
+  
+  def login(user, passwd)
+    connect(user, passwd)
+  end
 
   protected
   def base_url(date)
@@ -22,10 +26,6 @@ class Lequipe < Crawler
   
   def should_keep_link(link, date) 
     link.path =~ /Quotidien/
-  end
-
-  def initialize(user, passwd)
-    connect(user, passwd)
   end
   
   def options
@@ -74,7 +74,7 @@ class Lequipe < Crawler
   end
     
   def extract_article(page, date)
-    article = Article.new(page.url, source)
+    article = Article.new(source, date, page.url)
     article.id = extract_id(page.url)
     
     doc = page.doc

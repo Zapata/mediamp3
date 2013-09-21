@@ -1,13 +1,19 @@
 - Send simple email
-- See podcast diffusion
-- Write a download / install script (to don't save everything on git)
-- Daily batch job (EC2 Windows?)
+- Install EC2 Windows Instance (SSH: http://solutious.com/blog/2009/08/19/ssh-on-windows/, Text to speech, git / heroku belt)
+- Do an AMI of the install
+- Write a download / install script
+- Schedule batch daily job on EC2 Windows instance.
 - Add rights to download: AWS - Identity Access Management
-- See bittorrent diffusion
 
+- Switch to Fog (http://fog.io/)
+- Store everything in a database (amazon SimpleDB).
 - Better monitor (add stats in encoder: article size, mp3 size, average time/size per word ...)
-- Rewrite using in asynchronous mode (reactor pattern).
-- Store everything in a database.
+- Speed up using in asynchronous mode (event machine?).
+
+- See Daisy format
+- See bittorrent diffusion
+- See podcast diffusion (http://www.libsyn.com/ ?)
+
 
 - 20 minutes: 
    - gather more metadata.

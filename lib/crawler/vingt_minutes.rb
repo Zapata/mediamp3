@@ -28,7 +28,7 @@ class VingtMinutes < Crawler
   end
   
   def extract_article(page, date)
-    article = Article.new(page.url, source)
+    article = Article.new(source, date, page.url)
     article.id = extract_id(page.url, date)
     doc = page.doc
     unless doc.nil?

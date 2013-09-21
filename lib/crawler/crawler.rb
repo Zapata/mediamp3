@@ -12,6 +12,7 @@ class Crawler
   public
   
   def crawl(date)
+    puts "Crawling: #{source}"
     unique_articles = Set.new
     
     Anemone.crawl(base_url(date), options) do |anemone|
