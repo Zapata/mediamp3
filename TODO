@@ -1,12 +1,12 @@
-- Send simple email
 - Install EC2 Windows Instance (SSH: http://solutious.com/blog/2009/08/19/ssh-on-windows/, Text to speech, git / heroku belt)
 - Do an AMI of the install
 - Write a download / install script
 - Schedule batch daily job on EC2 Windows instance.
 - Add rights to download: AWS - Identity Access Management
 
-- Switch to Fog (http://fog.io/)
-- Store everything in a database (amazon SimpleDB).
+- Use a proper templating format for mail (http://www.hokstad.com/mini-reviews-of-19-ruby-template-engines, )
+- Switch to Fog? (http://fog.io/)
+- Store everything in a database (amazon SimpleDB ?).
 - Better monitor (add stats in encoder: article size, mp3 size, average time/size per word ...)
 - Speed up using in asynchronous mode (event machine?).
 

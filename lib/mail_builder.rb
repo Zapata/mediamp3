@@ -16,17 +16,39 @@ class MailBuilder
           doc.title title
         }
         doc.body {
-          doc.h1 title
+          doc.text "Cher(e) abonné(e) MediaMp3,"
+          doc.br
+          doc.br
+          doc.text "Voici le sommaire du journal #{title} : "
           doc.ul {
            articles.each do |article|
-              doc.li {
+              doc.li { 
+                doc.text "#{article.title} : "
                 doc.a(:href => article.mp3_link(@base_url)) {
-                  doc.text article.title
+                  doc.text 'écouter'
                 }
               }
            end
           }
+          
+          doc.p {
+            doc.text "MediaMp3 est une startup développant un outil de transformation de la presse quotidienne "
+            doc.text "écrite (L'équipe, 20minutes, le Parisien, le Monde ...) en fichiers audio .mp3. "
+            doc.text "C’est le même concept que le livre audio, appliqué à la presse quotidienne."
+          }
+          
+          doc.p {
+            doc.text "Nous gérons actuellement L'équipe et le 20 minutes. "
+            doc.text "Si vous êtes intéressés pour recevoir ces journaux quotidiennement, repondez à cet email."
+          }
+
+          doc.p {
+            doc.text "Nous sommes actuellement en phase de lancement tout feedback sur le service est le bienvenu."
+          }
+                    
           doc.p(:style=>"text-align: center") {
+            doc.b "MediaMp3 : ton journal, tu écouteras!"
+            doc.br
             doc.text "Cet email a été envoyé à "
             doc.a(:href => "mailto:[[EMAIL_TO]]") {
               doc.text '[[EMAIL_TO]]'

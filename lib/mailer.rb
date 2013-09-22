@@ -14,9 +14,11 @@ class Mailer
     end
   end
 
-  def test(source_name, date, base_url, articles)
+  def send(source_name, date, base_url, articles, list_name)
     mail = MailBuilder.new(source_name, date, base_url)
 
+    list = Mailjet::List.all.find{|l| l.label == list_name }
+    
     title = "[MediaMp3] " + mail.title
     campaign = Mailjet::Campaign.create(title: title, 
                                         subject: title, 
@@ -24,12 +26,16 @@ class Mailer
                                         from_name: 'MediaMp3', 
                                         lang: 'fr',
                                         edition_mode: 'html',
-                                        footer: 'default',
-                                        permalink: 'default')
+                                        list_id: list.id)
 
     campaign.set_html(mail.build(articles)) 
-    p campaign
+      
+    puts "Subject : #{campaign.subject}"
+    puts "Url: #{campaign.url}"
+    puts "Nb Articles : #{articles.length}"
+    puts "Nb Contacts : #{list.contacts.length}"
     
+    campaign.send!
   end
     
 end

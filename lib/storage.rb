@@ -6,7 +6,7 @@ class Storage
       :access_key_id => config.access_key_id, 
       :secret_access_key => config.secret_access_key)
     @bucket = s3.buckets[config.bucket_name]
-    puts "Start upload to: #{bucket.url}"
+    puts "Start upload to: #{@bucket.url}"
   end
   
   def upload(article)

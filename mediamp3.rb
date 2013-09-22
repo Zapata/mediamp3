@@ -68,15 +68,18 @@ class MediaMp3 < Thor
     puts m.build(articles)
   end
   
-  desc "mail_test SOURCE", "Manipulate MailJet API"
-  def mail_test(source)
+  desc "mail SOURCE", "Create a campaign and send emails with articles through MailJet."
+  method_option :contact_list, :type => :string, :desc => 'Mailjet contact list to send mail to.'
+  def mail(source)
     check_sources(source)
 
     articles = []
     on_articles(options[:date], source) { |a| articles << a }
 
+    contact_list = options[:contact_list] || @config.email.mailjet_list
+
     m = Mailer.new(@config.email)
-    m.test(source_config(source).name, options[:date], @config.storage.base_url, articles)
+    m.send(source_config(source).name, options[:date], @config.storage.base_url, articles, contact_list)
   end
   
   
