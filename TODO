@@ -1,21 +1,20 @@
-- Install EC2 Windows Instance (SSH: http://solutious.com/blog/2009/08/19/ssh-on-windows/, Text to speech, git / heroku belt)
-- Do an AMI of the install
-- Write a download / install script
-- Schedule batch daily job on EC2 Windows instance.
-- Add rights to download: AWS - Identity Access Management
+- Rewrite to use basic conversion powershell (wav no pitch nor speed)
+- make it work on 20 minutes on server
+- simple web site to see content
+- website should be accessible from internet
+- write a deployement script
+- update code to make a diff from previous run
+- use windows scheduler to trigger batch every day
 
-- Use a proper templating format for mail (http://www.hokstad.com/mini-reviews-of-19-ruby-template-engines, )
-- Switch to Fog? (http://fog.io/)
-- Store everything in a database (amazon SimpleDB ?).
-- Better monitor (add stats in encoder: article size, mp3 size, average time/size per word ...)
-- Speed up using in asynchronous mode (event machine?).
-
-- See Daisy format
-- See bittorrent diffusion
-- See podcast diffusion (http://www.libsyn.com/ ?)
+- add a job to keep generated volume small
+- nice web player
+- view results in real time (html5 / websocket)
 
 
-- 20 minutes: 
-   - gather more metadata.
+- use resque / qless to process in background (use rediscloud)
+- generic crawler from a rss
+- Fine tune voice configuration (use SSML as input, speed 2, pitch 7)
+- be able to discover rss (gem install feedbag)
 
-- Fine tune voice configuration
+- Better podcast diffusion  (http://www.libsyn.com/ ?)
+- Store everything in a database (amazon SimpleDB ?, rediscloud).

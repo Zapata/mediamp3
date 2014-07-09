@@ -3,6 +3,7 @@ require 'bundler/setup'
 
 require 'thor'
 require 'configuration'
+require 'parallel'
 
 require_relative 'lib/article'
 require_relative 'lib/media_encoder'
@@ -33,7 +34,6 @@ class MediaMp3 < Thor
 
     articles = crawler.crawl(options[:date]) { |a| a.save }
   end
-  
   
   desc "encode SOURCE", "Convert all articles from a source to mp3."
   def encode(source)
@@ -105,8 +105,8 @@ class MediaMp3 < Thor
     
     def on_articles(date, source)
       Dir["#{calculate_path(date, source)}/*.json"].each do |f|
-        article = JSON.load(File.new(f))
-        yield article
+          article = JSON.load(File.new(f))
+          yield article
       end
     end
     
