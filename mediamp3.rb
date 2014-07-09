@@ -3,7 +3,6 @@ require 'bundler/setup'
 
 require 'thor'
 require 'configuration'
-require 'parallel'
 
 require_relative 'lib/article'
 require_relative 'lib/media_encoder'
